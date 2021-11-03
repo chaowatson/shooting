@@ -16,16 +16,15 @@ class EasyGame(PaiaGame):
     This is a Interface of a game
     """
 
-    def __init__(self, time_to_play, total_point_count, score, color):
+    def __init__(self, time_to_play, game_mode):
         super().__init__()
         self.game_result_state = GameResultState.FAIL
         self.scene = Scene(width=800, height=600, color="#4FC3F7", bias_x=0, bias_y=0)
-        print(color)
-        self.ball = Ball("#"+color)
+        self.ball = Ball("#"+"FFFFFF")
         self.foods = pygame.sprite.Group()
         self.score = 0
-        self.score_to_win = score
-        self._create_foods(total_point_count)
+        #self.score_to_win = score
+        #self._create_foods(total_point_count)
         self._begin_time = time.time()
         self._timer = 0
         self.frame_count = 0
@@ -81,7 +80,7 @@ class EasyGame(PaiaGame):
 
         if self.is_running:
             status = GameStatus.GAME_ALIVE
-        elif self.score > self.score_to_win:
+        elif self.score > 0: #self.score_to_win:
             status = GameStatus.GAME_PASS
         else:
             status = GameStatus.GAME_OVER
@@ -153,8 +152,9 @@ class EasyGame(PaiaGame):
                 "attachment": [
 
                     {"player": self.ai_clients()[0]["name"],
-                     "score": self.score,
-                     "rank": 1
+                     "score": "score",
+                     "remain_hp": 1,
+                     "remain_time": 1
                      }
                 ]
 
