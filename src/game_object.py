@@ -3,35 +3,49 @@ import random
 import pygame.sprite
 
 
-class Ball(pygame.sprite.Sprite):
-    def __init__(self, color="#FFEB3B"):
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface([50, 50])
-        self.color = color
+        self.image = pygame.image.load("../asset/img/player.png")
+        self.image.convert()
+        self.vel = pygame.math.Vector2(0, 0)
+        self.pos = pygame.math.Vector2(400, 300)
+        self.rot = 0
         self.rect = self.image.get_rect()
         self.rect.center = (400, 300)
 
-    def update(self, motions):
+    def get_keys(self, motions):
+        self.rot_speed = 0
+        self.vel = pygame.math.Vector2(0, 0)
         for motion in motions:
             if motion == "UP":
-                self.rect.centery -= 10.5
+                self.vel = pygame.math.Vector2(10, 0).rotate(-self.rot)
             elif motion == "DOWN":
-                self.rect.centery += 10.5
-            elif motion == "LEFT":
-                self.rect.centerx -= 10.5
-            elif motion == "RIGHT":
-                self.rect.centerx += 10.5
+                self.vel = pygame.math.Vector2(-10, 0).rotate(-self.rot)
+            elif motion == "LEFT_TURN":
+                self.rot_speed = 5
+            elif motion == "RIGHT_TURN":
+                self.rot_speed = -5
+
+
+    def update(self, motions):
+        self.get_keys(motions)
+        self.rot = (self.rot + self.rot_speed) % 360
+        rotate_image = self.image
+        self.image = pygame.transform.rotate(rotate_image, self.rot)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
+        self.pos += self.vel
 
     @property
     def game_object_data(self):
-        return {"type": "rect",
-                "name": "ball",
+        return {"type": "image",
+                "name": "player",
                 "x": self.rect.x,
                 "y": self.rect.y,
                 "angle": 0,
                 "width": self.rect.width,
                 "height": self.rect.height,
-                "color": self.color
                 }
 
 

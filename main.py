@@ -6,12 +6,12 @@ sys.path.append(r"../..")
 
 from mlgame.view.view import PygameView
 from mlgame.gamedev.generic import quit_or_esc
-from src.game import EasyGame
+from src.game import Shooting
 
 FPS = 30
 if __name__ == '__main__':
     pygame.init()
-    game = EasyGame(time_to_play=1000, total_point_count=10, score=5, color="FF9800")
+    game = Shooting(time_to_play=1000, total_point_count=10, score=5, color="FF9800")
     scene_init_info_dict = game.get_scene_init_data()
     game_view = PygameView(scene_init_info_dict)
     frame_count = 0

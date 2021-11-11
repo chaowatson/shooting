@@ -7,9 +7,9 @@
       "name": "time_to_play",
       "verbose": "遊戲總幀數",
       "type": "int",
-      "max": 18000,
+      "max": 6000000,
       "min": 300,
-      "default": 10800,
+      "default": 6000000,
       "help": "set the limit of frame count , actually time will be revised according to your FPS ."
     },
     {
