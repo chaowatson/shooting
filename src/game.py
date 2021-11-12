@@ -1,5 +1,6 @@
 import time
 from os import path
+from param import *
 
 import pygame
 
@@ -7,6 +8,7 @@ from mlgame.gamedev.game_interface import PaiaGame, GameResultState, GameStatus
 from mlgame.view.test_decorator import check_game_progress, check_game_result
 from mlgame.view.view_model import create_text_view_data, create_asset_init_data, create_image_view_data, Scene
 from .game_object import Player, Food
+
 
 ASSET_PATH = path.join(path.dirname(__file__), "../asset")
 
@@ -19,7 +21,7 @@ class Shooting(PaiaGame):
     def __init__(self, time_to_play, game_mode):
         super().__init__()
         self.game_result_state = GameResultState.FAIL
-        self.scene = Scene(width=800, height=600, color="#4FC3F7", bias_x=0, bias_y=0)
+        self.scene = Scene(width=40*TILESIZE, height=30*TILESIZE, color="#4FC3F7", bias_x=0, bias_y=0)
         self.player = Player()
         self.foods = pygame.sprite.Group()
         self.score = 0
@@ -99,9 +101,11 @@ class Shooting(PaiaGame):
         # TODO add music or sound
         # bg_path = path.join(ASSET_PATH, "img/background.jpg")
         # background = create_asset_init_data("background", 800, 600, bg_path, "url")
+        player_path = path.join(ASSET_PATH, "img/player.png")
+        player = create_asset_init_data("player", 32, 32, player_path, "url")
         scene_init_data = {"scene": self.scene.__dict__,
                            "assets": [
-
+                                player
                            ],
                            # "audios": {}
                            }
