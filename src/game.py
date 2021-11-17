@@ -1,13 +1,16 @@
 import time
 from os import path
-from param import *
+
 
 import pygame
 
 from mlgame.gamedev.game_interface import PaiaGame, GameResultState, GameStatus
 from mlgame.view.test_decorator import check_game_progress, check_game_result
-from mlgame.view.view_model import create_text_view_data, create_asset_init_data, create_image_view_data, Scene
+from mlgame.view.view_model import create_text_view_data, create_asset_init_data, create_image_view_data, create_line_view_data , Scene
+from mlgame.view.view import PygameView
 from .game_object import Player, Food
+from .param import *
+from .map import *
 
 
 ASSET_PATH = path.join(path.dirname(__file__), "../asset")
@@ -21,8 +24,9 @@ class Shooting(PaiaGame):
     def __init__(self, time_to_play, game_mode):
         super().__init__()
         self.game_result_state = GameResultState.FAIL
-        self.scene = Scene(width=40*TILESIZE, height=30*TILESIZE, color="#4FC3F7", bias_x=0, bias_y=0)
+        self.scene = Scene(width=WIDTH, height=HEIGHT, color="#FFFFFF", bias_x=0, bias_y=0)
         self.player = Player()
+        self.map = TiledMap(path.join(ASSET_PATH, "map/map1.tmx"))
         self.foods = pygame.sprite.Group()
         self.score = 0
         #self.score_to_win = score
@@ -90,6 +94,13 @@ class Shooting(PaiaGame):
     def reset(self):
         pass
 
+    def draw_grid(self):
+        for x in range(0, WIDTH, TILESIZE):
+            pygame.draw.line(self.scene, GREY, (x, 0), (x, HEIGHT))
+        for y in range(0, HEIGHT, TILESIZE):
+            pygame.draw.line(self.scene, GREY, (0, y), (WIDTH, y))
+
+
     @property
     def is_running(self):
         return self.frame_count < self.time_limit
@@ -99,8 +110,8 @@ class Shooting(PaiaGame):
         Get the initial scene and object information for drawing on the web
         """
         # TODO add music or sound
-        # bg_path = path.join(ASSET_PATH, "img/background.jpg")
-        # background = create_asset_init_data("background", 800, 600, bg_path, "url")
+        map_path = path.join(ASSET_PATH, "map/map1.tmx")
+        map = create_asset_init_data("map", 800, 600, map_path, "url")
         player_path = path.join(ASSET_PATH, "img/player.png")
         player = create_asset_init_data("player", 32, 32, player_path, "url")
         scene_init_data = {"scene": self.scene.__dict__,

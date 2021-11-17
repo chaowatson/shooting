@@ -1,10 +1,9 @@
 import random
 
 import pygame.sprite
-from os import path
-from param import *
 import math
-ASSET_PATH = path.join(path.dirname(__file__), "../asset")
+from .param import *
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
