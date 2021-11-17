@@ -12,10 +12,10 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface((TILESIZE, TILESIZE))
         # self.image.convert()
         self.vel = pygame.math.Vector2(0, 0)
-        self.pos = pygame.math.Vector2(20*TILESIZE, 15*TILESIZE)
+        self.pos = pygame.math.Vector2(10*TILESIZE, 7*TILESIZE)
         self.rot = 0
         self.rect = self.image.get_rect()
-        self.rect.center = (20*TILESIZE, 15*TILESIZE)
+        self.rect.center = (10*TILESIZE, 7*TILESIZE)
         self.angle = 0
 
     def get_keys(self, motions):
@@ -23,9 +23,9 @@ class Player(pygame.sprite.Sprite):
         self.vel = pygame.math.Vector2(0, 0)
         for motion in motions:
             if motion == "UP":
-                self.vel = pygame.math.Vector2(5, 0).rotate(-self.rot)
+                self.vel = pygame.math.Vector2(10, 0).rotate(-self.rot)
             elif motion == "DOWN":
-                self.vel = pygame.math.Vector2(-5, 0).rotate(-self.rot)
+                self.vel = pygame.math.Vector2(-10, 0).rotate(-self.rot)
             elif motion == "LEFT_TURN":
                 self.rot_speed = 5
             elif motion == "RIGHT_TURN":
