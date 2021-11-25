@@ -8,12 +8,13 @@ from mlgame.gamedev.game_interface import PaiaGame, GameResultState, GameStatus
 from mlgame.view.test_decorator import check_game_progress, check_game_result
 from mlgame.view.view_model import create_text_view_data, create_asset_init_data, create_image_view_data, create_line_view_data , Scene
 from mlgame.view.view import PygameView
-from .game_object import Player, Food
+from .game_object import *
 from .param import *
 from .map import *
 
 
 ASSET_PATH = path.join(path.dirname(__file__), "../asset")
+MAP_PATH = path.join(ASSET_PATH, "map/map1.tmx")
 
 
 class Shooting(PaiaGame):
@@ -25,30 +26,29 @@ class Shooting(PaiaGame):
         super().__init__()
         self.game_result_state = GameResultState.FAIL
         self.scene = Scene(width=WIDTH, height=HEIGHT, color="#FFFFFF", bias_x=0, bias_y=0)
-        self.player = Player()
-        self.map = TiledMap(path.join(ASSET_PATH, "map/map1.tmx"))
-        self.foods = pygame.sprite.Group()
+        self.map = TiledMap(MAP_PATH)
+        self.setup()
         self.score = 0
-        #self.score_to_win = score
-        #self._create_foods(total_point_count)
         self._begin_time = time.time()
         self._timer = 0
         self.frame_count = 0
         self.time_limit = time_to_play
 
+    def setup(self):
+        # initialize all variables and do all the setup for a new game
+        self.all_sprites = pygame.sprite.Group()
+        self.walls = pygame.sprite.Group()
+        for tile_object in self.map.tmxdata.objects:
+            if tile_object.name == 'Player':
+                self.player = Player(self, tile_object.x, tile_object.y)
+            if tile_object.name == 'Wall':
+                Wall(self, tile_object.x, tile_object.y,
+                         tile_object.width, tile_object.height)
+
     def update(self, commands):
         # handle command
         ai_1p_cmd = commands[self.ai_clients()[0]["name"]]
         self.player.update(ai_1p_cmd)
-
-        # update sprite
-        self.foods.update()
-
-        # handle collision
-        hits = pygame.sprite.spritecollide(self.player, self.foods, True, pygame.sprite.collide_rect_ratio(0.8))
-        if hits:
-            self.score += len(hits)
-            self._create_foods(len(hits))
         self._timer = round(time.time() - self._begin_time, 3)
 
         self.frame_count += 1
@@ -63,14 +63,10 @@ class Shooting(PaiaGame):
         we could send different data to different ai
         """
         to_players_data = {}
-        foods_data = []
-        for food in self.foods:
-            foods_data.append({"x": food.rect.x, "y": food.rect.y})
         data_to_1p = {
             "frame": self.frame_count,
-            "ball_x": self.player.rect.centerx,
-            "ball_y": self.player.rect.centery,
-            "foods": foods_data,
+            "player_x": self.player.rect.centerx,
+            "player_y": self.player.rect.centery,
             "score": self.score,
             "status": self.get_game_status()
         }
@@ -94,12 +90,6 @@ class Shooting(PaiaGame):
     def reset(self):
         pass
 
-    def draw_grid(self):
-        for x in range(0, WIDTH, TILESIZE):
-            pygame.draw.line(self.scene, GREY, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, TILESIZE):
-            pygame.draw.line(self.scene, GREY, (0, y), (WIDTH, y))
-
 
     @property
     def is_running(self):
@@ -110,12 +100,13 @@ class Shooting(PaiaGame):
         Get the initial scene and object information for drawing on the web
         """
         # TODO add music or sound
-        map_path = path.join(ASSET_PATH, "map/map1.tmx")
-        map = create_asset_init_data("map", 800, 600, map_path, "url")
+        map1_path = path.join(ASSET_PATH, "img/map1.png")
+        map1 = create_asset_init_data("map1", WIDTH, HEIGHT, map1_path, "url")
         player_path = path.join(ASSET_PATH, "img/player.png")
         player = create_asset_init_data("player", 32, 32, player_path, "url")
         scene_init_data = {"scene": self.scene.__dict__,
                            "assets": [
+                                map1,
                                 player
                            ],
                            # "audios": {}
@@ -127,18 +118,14 @@ class Shooting(PaiaGame):
         """
         Get the position of game objects for drawing on the web
         """
-        foods_data = []
-        for food in self.foods:
-            foods_data.append(food.game_object_data)
         game_obj_list = [self.player.game_object_data]
-        game_obj_list.extend(foods_data)
-        # background = create_image_view_data("background", 0, 0, 800, 600)
-        score_text = create_text_view_data("Score = " + str(self.score), 650, 50, "#FF0000")
-        timer_text = create_text_view_data("Timer = " + str(self._timer) + " s", 650, 100, "#FFAA00")
+        map1 = create_image_view_data("map1", 0, 0, WIDTH, HEIGHT)
+        score_text = create_text_view_data("Score = " + str(self.score), 17*TILESIZE, 0, "#FF0000")
+        timer_text = create_text_view_data("Timer = " + str(self._timer) + " s", 17*TILESIZE, 0.5*TILESIZE,  "#FFAA00")
         scene_progress = {
             # background view data will be draw first
             "background": [
-                # background,
+                map1,
 
             ],
             # game object view data will be draw on screen by order , and it could be shifted by WASD
@@ -195,11 +182,6 @@ class Shooting(PaiaGame):
         ai_1p = self.ai_clients()[0]["name"]
         return {ai_1p: cmd_1p}
 
-    def _create_foods(self, count: int = 5):
-        for i in range(count):
-            # add food to group
-            food = Food(self.foods)
-        pass
 
     @staticmethod
     def ai_clients():

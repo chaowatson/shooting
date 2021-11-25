@@ -13,11 +13,18 @@ class MLPlay:
         if scene_info["status"] != "GAME_ALIVE":
             return "RESET"
         else:
-            return ["UP", "LEFT_TURN"]
+            self.counter += 1
+            if self.counter % 10 == 0:
+                return ["LEFT_TURN"]
+            else:
+                if self.counter % 18 == 0:
+                    return ["RIGHT_TURN"]
+                else:
+                    return ["UP"]
+
 
     def reset(self):
         """
         Reset the status
         """
         print("reset ml script")
-        pass
