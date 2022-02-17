@@ -123,19 +123,19 @@ class Shooting(PaiaGame):
         """
         Get the position of game objects for drawing on the web
         """
-
-        game_obj_list = [self.player.game_object_data]
+        map1 = create_image_view_data("map1", 0, 0, WIDTH, HEIGHT)
+        game_obj_list = [map1]
+        game_obj_list.extend([self.player.game_object_data])
         bullets_data = []
         for bullet in self.bullets:
             bullets_data.append(bullet.game_object_data)
         game_obj_list.extend(bullets_data)
-        map1 = create_image_view_data("map1", 0, 0, WIDTH, HEIGHT)
         score_text = create_text_view_data("Score = " + str(self.score), 17*TILESIZE, 0, "#FF0000")
         timer_text = create_text_view_data("Timer = " + str(self._timer) + " s", 17*TILESIZE, 0.5*TILESIZE,  "#FFAA00")
         scene_progress = {
             # background view data will be draw first
             "background": [
-                map1,
+
 
             ],
             # game object view data will be draw on screen by order , and it could be shifted by WASD
