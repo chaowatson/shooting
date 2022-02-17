@@ -38,6 +38,7 @@ class Shooting(PaiaGame):
         # initialize all variables and do all the setup for a new game
         self.all_sprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
+        self.bullets = pygame.sprite.Group()
         for tile_object in self.map.tmxdata.objects:
             if tile_object.name == 'Player':
                 self.player = Player(self, tile_object.x, tile_object.y)
@@ -49,6 +50,7 @@ class Shooting(PaiaGame):
         # handle command
         ai_1p_cmd = commands[self.ai_clients()[0]["name"]]
         self.player.update(ai_1p_cmd)
+        self.bullets.update()
         self._timer = round(time.time() - self._begin_time, 3)
 
         self.frame_count += 1
@@ -104,10 +106,13 @@ class Shooting(PaiaGame):
         map1 = create_asset_init_data("map1", WIDTH, HEIGHT, map1_path, "url")
         player_path = path.join(ASSET_PATH, "img/player.png")
         player = create_asset_init_data("player", 32, 32, player_path, "url")
+        bullet_path = path.join(ASSET_PATH, "img/bullet.png")
+        bullet = create_asset_init_data("bullet", 32, 32, bullet_path, "url")
         scene_init_data = {"scene": self.scene.__dict__,
                            "assets": [
                                 map1,
-                                player
+                                player,
+                                bullet
                            ],
                            # "audios": {}
                            }
@@ -118,7 +123,12 @@ class Shooting(PaiaGame):
         """
         Get the position of game objects for drawing on the web
         """
+
         game_obj_list = [self.player.game_object_data]
+        bullets_data = []
+        for bullet in self.bullets:
+            bullets_data.append(bullet.game_object_data)
+        game_obj_list.extend(bullets_data)
         map1 = create_image_view_data("map1", 0, 0, WIDTH, HEIGHT)
         score_text = create_text_view_data("Score = " + str(self.score), 17*TILESIZE, 0, "#FF0000")
         timer_text = create_text_view_data("Timer = " + str(self._timer) + " s", 17*TILESIZE, 0.5*TILESIZE,  "#FFAA00")
@@ -173,12 +183,12 @@ class Shooting(PaiaGame):
             cmd_1p.append("UP")
         if key_pressed_list[pygame.K_s]:
             cmd_1p.append("DOWN")
-
         if key_pressed_list[pygame.K_a]:
             cmd_1p.append("LEFT_TURN")
-
         if key_pressed_list[pygame.K_d]:
             cmd_1p.append("RIGHT_TURN")
+        if key_pressed_list[pygame.K_SPACE]:
+            cmd_1p.append("SHOOT")
         ai_1p = self.ai_clients()[0]["name"]
         return {ai_1p: cmd_1p}
 
