@@ -39,9 +39,12 @@ class Shooting(PaiaGame):
         self.all_sprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
         for tile_object in self.map.tmxdata.objects:
             if tile_object.name == 'Player':
                 self.player = Player(self, tile_object.x, tile_object.y)
+            if tile_object.name == 'Enemy':
+                EnemyFactory.create_enemy('enemy', self, tile_object.x, tile_object.y)
             if tile_object.name == 'Wall':
                 Wall(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height)
@@ -50,9 +53,9 @@ class Shooting(PaiaGame):
         # handle command
         ai_1p_cmd = commands[self.ai_clients()[0]["name"]]
         self.player.update(ai_1p_cmd)
+        self.enemies.update()
         self.bullets.update()
         self._timer = round(time.time() - self._begin_time, 3)
-
         self.frame_count += 1
         # self.draw()
 
@@ -70,7 +73,12 @@ class Shooting(PaiaGame):
             "player_x": self.player.rect.centerx,
             "player_y": self.player.rect.centery,
             "score": self.score,
-            "status": self.get_game_status()
+            "status": self.get_game_status(),
+            "north_detection": self.player.north_distance,
+            "south_detection": self.player.south_distance,
+            "west_detection": self.player.west_distance,
+            "east_detection": self.player.east_distance,
+
         }
 
         for ai_client in self.ai_clients():
@@ -106,12 +114,15 @@ class Shooting(PaiaGame):
         map1 = create_asset_init_data("map1", WIDTH, HEIGHT, map1_path, "url")
         player_path = path.join(ASSET_PATH, "img/player.png")
         player = create_asset_init_data("player", 32, 32, player_path, "url")
+        enemy_path = path.join(ASSET_PATH, "img/enemy.png")
+        enemy = create_asset_init_data("enemy", 32, 32, enemy_path, "url")
         bullet_path = path.join(ASSET_PATH, "img/bullet.png")
         bullet = create_asset_init_data("bullet", 32, 32, bullet_path, "url")
         scene_init_data = {"scene": self.scene.__dict__,
                            "assets": [
                                 map1,
                                 player,
+                                enemy,
                                 bullet
                            ],
                            # "audios": {}
@@ -130,8 +141,15 @@ class Shooting(PaiaGame):
         for bullet in self.bullets:
             bullets_data.append(bullet.game_object_data)
         game_obj_list.extend(bullets_data)
-        score_text = create_text_view_data("Score = " + str(self.score), 17*TILESIZE, 0, "#FF0000")
-        timer_text = create_text_view_data("Timer = " + str(self._timer) + " s", 17*TILESIZE, 0.5*TILESIZE,  "#FFAA00")
+        enemies_data = []
+        for enemy in self.enemies:
+            enemies_data.append(enemy.game_object_data)
+        game_obj_list.extend(enemies_data)
+        player_angle = create_text_view_data("player's angle = " + str(int(self.player.display_angle)), 12.5*TILESIZE, TILESIZE, "#000000")
+        top_distance = create_text_view_data("north distance = " + str(int(self.player.north_distance)), 12.5*TILESIZE, 0, "#000000")
+        down_distance = create_text_view_data("south distance = " + str(int(self.player.south_distance)), 12.5*TILESIZE, 0.5*TILESIZE,  "#000000")
+        left_distance = create_text_view_data("west distance = " + str(int(self.player.west_distance)), 16.5 *TILESIZE, 0, "#000000")
+        right_distance = create_text_view_data("east distance = " + str(int(self.player.east_distance)), 16.5*TILESIZE, 0.5 * TILESIZE, "#000000")
         scene_progress = {
             # background view data will be draw first
             "background": [
@@ -140,9 +158,9 @@ class Shooting(PaiaGame):
             ],
             # game object view data will be draw on screen by order , and it could be shifted by WASD
             "object_list": game_obj_list,
-            "toggle": [timer_text],
+            "toggle": [down_distance, top_distance, left_distance, right_distance, player_angle],
             "foreground": [
-                score_text
+
             ],
             # other information to display on web
             "user_info": [],
