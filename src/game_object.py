@@ -23,6 +23,9 @@ class Player(pygame.sprite.Sprite):
         self.angle = 0
         self.display_angle = 0
         self.hp = 100
+        self.cd = False
+        self.cd_count = 0
+        self.healthbar = HealthBar(self.game,self,"#00FF00")
         self.last_shot = 0
         self.shot = 0
         self.shot_cool = 0
@@ -90,7 +93,23 @@ class Player(pygame.sprite.Sprite):
                         else:
                             self.east_distance = east_min - self.rect.x - 32
 
+    def injured_cd(self):
+        self.cd = True
+
+    def injured_cd_control(self):
+        if self.cd:
+            if self.cd_count > 20:
+                self.cd = False
+                self.cd_count = 0
+            else:
+                self.cd_count += 1
+
     def update(self, motions):
+        print("-------------")
+        print("rot = ", self.rot)
+        print("vector = ", self.vel)
+        print("position = ", self.pos)
+
         self.detect()
         self.shot_cool += 1
         if self.shot_cool % 5 == 0:
@@ -105,6 +124,7 @@ class Player(pygame.sprite.Sprite):
             self.display_angle = self.display_angle + 360
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
+        self.injured_cd_control()
         Enemy.collide_with_enemies(self, self.game.enemies, 'x')
         Enemy.collide_with_enemies(self, self.game.enemies, 'y')
         self.pos += self.vel
@@ -113,6 +133,7 @@ class Player(pygame.sprite.Sprite):
         self.hit_rect.centery = self.pos.y
         Wall.collide_with_walls(self, self.game.walls, 'y')
         self.rect.center = self.hit_rect.center
+
     @property
     def game_object_data(self):
         return {"type": "image",
@@ -127,6 +148,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class Wall(pygame.sprite.Sprite):
+
     def __init__(self, game, x, y, width, height):
         self.groups = game.walls
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -159,6 +181,7 @@ class Wall(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
+
     def __init__(self, game, pos, dir):
         self.groups = game.all_sprites, game.bullets
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -171,7 +194,6 @@ class Bullet(pygame.sprite.Sprite):
         self.vel = dir #dir.rotate(spread) * 1
         self.spawn_time = 0
         self.angle = 0
-
 
     def update(self):
         self.spawn_time += 1
@@ -196,6 +218,7 @@ class Bullet(pygame.sprite.Sprite):
 
 
 class EnemyFactory:
+
     @staticmethod
     def create_enemy(enemy_type, game, x, y):
         if enemy_type == "enemy":
@@ -217,13 +240,16 @@ class Enemy(pygame.sprite.Sprite):
         self.rot = 0
         self.angle = -90 * math.pi / 180
         self.hp = 100
+        self.healthbar = HealthBar(self.game, self,"#FF0000")
         self.type = "enemy"
 
     def update(self):
-        print(self.hp)
         if self.hp < 1:
             self.kill()
+            self.healthbar.kill()
+        hit = pygame.sprite.spritecollideany(self, self.game.bullets)
         if pygame.sprite.spritecollideany(self, self.game.bullets):
+            hit.kill()
             self.hp -= 30
 
     @property
@@ -243,20 +269,27 @@ class Enemy(pygame.sprite.Sprite):
         if dir == 'x':
             hits = pygame.sprite.spritecollide(sprite, group, False, collide_hit_rect)
             if hits:
-                if hits[0].rect.centerx > sprite.hit_rect.centerx:
-                    if sprite.display_angle > 90 and sprite.display_angle <= 270:
+                if not sprite.cd:
+                    sprite.hp -= 30
+                    sprite.injured_cd()
+                if hits[0].rect.centery > sprite.hit_rect.centery:
+                    if sprite.display_angle <= 90 or sprite.display_angle >= 270:
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
                     else:
                         sprite.vel = pygame.math.Vector2(-50, 0).rotate(-sprite.rot)
-                if hits[0].rect.centerx < sprite.hit_rect.centerx:
-                    if sprite.display_angle > 90 and sprite.display_angle <= 270:
+                if hits[0].rect.centery < sprite.hit_rect.centery:
+                    if sprite.display_angle <= 90 or sprite.display_angle >= 270:
                         sprite.vel = pygame.math.Vector2(-50, 0).rotate(-sprite.rot)
                     else:
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
 
+
         if dir == 'y':
             hits = pygame.sprite.spritecollide(sprite, group, False, collide_hit_rect)
             if hits:
+                if not sprite.cd:
+                    sprite.hp -= 30
+                    sprite.injured_cd()
                 if hits[0].rect.centery > sprite.hit_rect.centery:
                     if sprite.display_angle <= 180:
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
@@ -269,5 +302,24 @@ class Enemy(pygame.sprite.Sprite):
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
 
 
+class HealthBar(pygame.sprite.Sprite):
+    def __init__(self, game,character,color):
+        self.groups = game.all_sprites, game.healthbars
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pygame.Surface((32, 8))
+        self.character = character
+        self.angle = 0
+        self.color = color
 
 
+    @property
+    def game_object_data(self):
+        return {"type": "rect",
+                "x": self.character.rect.x,
+                "y": self.character.rect.y - 15,
+                "angle": self.angle,
+                "width": (32*self.character.hp)/100,
+                "height": 4,
+                "color": self.color,
+                }

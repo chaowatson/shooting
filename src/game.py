@@ -40,6 +40,7 @@ class Shooting(PaiaGame):
         self.walls = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
+        self.healthbars = pygame.sprite.Group()
         for tile_object in self.map.tmxdata.objects:
             if tile_object.name == 'Player':
                 self.player = Player(self, tile_object.x, tile_object.y)
@@ -145,6 +146,10 @@ class Shooting(PaiaGame):
         for enemy in self.enemies:
             enemies_data.append(enemy.game_object_data)
         game_obj_list.extend(enemies_data)
+        healthbar_data = []
+        for healthbar in self.healthbars:
+            healthbar_data.append(healthbar.game_object_data)
+        game_obj_list.extend(healthbar_data)
         player_angle = create_text_view_data("player's angle = " + str(int(self.player.display_angle)), 12.5*TILESIZE, TILESIZE, "#000000")
         top_distance = create_text_view_data("north distance = " + str(int(self.player.north_distance)), 12.5*TILESIZE, 0, "#000000")
         down_distance = create_text_view_data("south distance = " + str(int(self.player.south_distance)), 12.5*TILESIZE, 0.5*TILESIZE,  "#000000")
