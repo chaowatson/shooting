@@ -48,7 +48,7 @@ class Player(pygame.sprite.Sprite):
             elif motion == "SHOOT":
                 if self.shot == 0:
                     dir = pygame.math.Vector2(1, 0).rotate(-self.rot)
-                    pos = self.pos + pygame.math.Vector2(0,0).rotate(-self.rot)
+                    pos = self.pos + pygame.math.Vector2(32, 0).rotate(-self.rot)
                     Bullet(self.game, pos, dir)
                     self.vel = pygame.math.Vector2(-3, 0).rotate(-self.rot)
                     self.shot = 1
@@ -93,6 +93,11 @@ class Player(pygame.sprite.Sprite):
                         else:
                             self.east_distance = east_min - self.rect.x - 32
 
+    def shoot_cd(self):
+        self.shot_cool += 1
+        if self.shot_cool % 5 == 0:
+            self.shot = 0
+
     def injured_cd(self):
         self.cd = True
 
@@ -108,8 +113,7 @@ class Player(pygame.sprite.Sprite):
 
         self.detect()
         self.shot_cool += 1
-        if self.shot_cool % 5 == 0:
-            self.shot = 0
+        self.shoot_cd()
         self.get_keys(motions)
         self.rot = self.rot + self.rot_speed
         if self.rot >= 360 or self.rot <= -360:
@@ -129,6 +133,10 @@ class Player(pygame.sprite.Sprite):
         self.hit_rect.centery = self.pos.y
         Wall.collide_with_walls(self, self.game.walls, 'y')
         self.rect.center = self.hit_rect.center
+        hit = pygame.sprite.spritecollideany(self, self.game.bullets)
+        if pygame.sprite.spritecollideany(self, self.game.bullets):
+            hit.kill()
+            self.hp -= 30
 
     @property
     def game_object_data(self):
@@ -239,7 +247,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.hit_rect = self.rect
         self.hit_rect.center = self.rect.center
-        self.rot = 0
+        self.rot = 270
         self.angle = -90 * math.pi / 180
         self.hp = 100
         self.healthbar = HealthBar(self.game, self, "#FF0000")
@@ -342,9 +350,26 @@ class ShootingEnemy(Enemy):
     def __init__(self, game, x, y, moving_path: list, speed):
         super().__init__(game, x, y, moving_path, speed)
         self.type = "shooting enemy"
+        self.shot = 0
+        self.shot_cool = 0
+
+    def shoot(self):
+        if self.shot == 0:
+            dir = pygame.math.Vector2(1, 0).rotate(-self.rot)
+            pos = self.pos + pygame.math.Vector2(5, 0).rotate(-self.rot)
+            Bullet(self.game, pos, dir)
+            self.shot = 1
+
+    def shoot_cd(self):
+        self.shot_cool += 1
+        if self.shot_cool % 15 == 0 or self.shot_cool % 15 == 2 or self.shot_cool % 15 == 4:
+            self.shot = 0
+
 
     def update(self):
         super(ShootingEnemy, self).update()
+        self.shoot()
+        self.shoot_cd()
 
 
 
