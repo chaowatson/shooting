@@ -105,10 +105,6 @@ class Player(pygame.sprite.Sprite):
                 self.cd_count += 1
 
     def update(self, motions):
-        print("-------------")
-        print("rot = ", self.rot)
-        print("vector = ", self.vel)
-        print("position = ", self.pos)
 
         self.detect()
         self.shot_cool += 1
@@ -194,6 +190,7 @@ class Bullet(pygame.sprite.Sprite):
         self.vel = dir #dir.rotate(spread) * 1
         self.spawn_time = 0
         self.angle = 0
+        self.type = "enemy"
 
     def update(self):
         self.spawn_time += 1
@@ -201,7 +198,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.center = self.pos
         if pygame.sprite.spritecollideany(self, self.game.walls):
             self.kill()
-        if self.spawn_time > 10:
+        if self.spawn_time > 30:
             self.kill()
 
     @property
@@ -220,13 +217,18 @@ class Bullet(pygame.sprite.Sprite):
 class EnemyFactory:
 
     @staticmethod
-    def create_enemy(enemy_type, game, x, y):
-        if enemy_type == "enemy":
-            return Enemy(game, x, y)
+    def create_enemy(enemy_type, game, x, y, moving_path=None, speed=None):
+
+        enemy = {'enemy': Enemy,
+                 'moving enemy': MovingEnemy,
+                 'shooting enemy': ShootingEnemy}
+
+        return enemy[enemy_type](game, x, y, moving_path, speed)
+
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, moving_path, speed):
         self.groups = game.all_sprites, game.enemies
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -240,8 +242,8 @@ class Enemy(pygame.sprite.Sprite):
         self.rot = 0
         self.angle = -90 * math.pi / 180
         self.hp = 100
-        self.healthbar = HealthBar(self.game, self,"#FF0000")
-        self.type = "enemy"
+        self.healthbar = HealthBar(self.game, self, "#FF0000")
+
 
     def update(self):
         if self.hp < 1:
@@ -255,13 +257,13 @@ class Enemy(pygame.sprite.Sprite):
     @property
     def game_object_data(self):
         return {"type": "image",
-                "name": self.type,
+                "name": "enemy",
                 "x": self.rect.x,
                 "y": self.rect.y,
                 "angle": self.angle,
                 "width": self.rect.width,
                 "height": self.rect.height,
-                "image_id": self.type
+                "image_id": "enemy"
                 }
 
     @staticmethod
@@ -283,7 +285,6 @@ class Enemy(pygame.sprite.Sprite):
                     else:
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
 
-
         if dir == 'y':
             hits = pygame.sprite.spritecollide(sprite, group, False, collide_hit_rect)
             if hits:
@@ -300,6 +301,51 @@ class Enemy(pygame.sprite.Sprite):
                         sprite.vel = pygame.math.Vector2(-50, 0).rotate(-sprite.rot)
                     else:
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
+
+
+class MovingEnemy(Enemy):
+    def __init__(self, game, x, y, moving_path: list, speed):
+        super().__init__(game, x, y, moving_path, speed)
+        self.type = "moving enemy"
+        self.moving_path = moving_path
+        self.path_index = 0
+        self.speed = speed
+        self.path_length = len(moving_path) - 1
+
+    def move_control(self, moving_path):
+        if self.path_index <= self.path_length:
+            if moving_path[self.path_index] == '+x':
+                self.vel = pygame.math.Vector2(self.speed, 0)
+            elif moving_path[self.path_index] == '-x':
+                self.vel = pygame.math.Vector2(-self.speed, 0)
+            elif moving_path[self.path_index] == '+y':
+                self.vel = pygame.math.Vector2(0, self.speed)
+            elif moving_path[self.path_index] == '-y':
+                self.vel = pygame.math.Vector2(0, -self.speed)
+            self.path_index += 1
+        else:
+            self.path_index = 0
+
+    def move(self):
+        self.pos += self.vel
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
+
+    def update(self):
+        super(MovingEnemy, self).update()
+        self.vel = pygame.math.Vector2(0, 0)
+        self.move_control(self.moving_path)
+        self.move()
+
+
+class ShootingEnemy(Enemy):
+    def __init__(self, game, x, y, moving_path: list, speed):
+        super().__init__(game, x, y, moving_path, speed)
+        self.type = "shooting enemy"
+
+    def update(self):
+        super(ShootingEnemy, self).update()
+
 
 
 class HealthBar(pygame.sprite.Sprite):

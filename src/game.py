@@ -3,6 +3,7 @@ from os import path
 
 
 import pygame
+import cProfile
 
 from mlgame.gamedev.game_interface import PaiaGame, GameResultState, GameStatus
 from mlgame.view.test_decorator import check_game_progress, check_game_result
@@ -11,7 +12,7 @@ from mlgame.view.view import PygameView
 from .game_object import *
 from .param import *
 from .map import *
-
+from .moving_enemy_path import *
 
 ASSET_PATH = path.join(path.dirname(__file__), "../asset")
 MAP_PATH = path.join(ASSET_PATH, "map/map1.tmx")
@@ -46,6 +47,8 @@ class Shooting(PaiaGame):
                 self.player = Player(self, tile_object.x, tile_object.y)
             if tile_object.name == 'Enemy':
                 EnemyFactory.create_enemy('enemy', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'MovingEnemy':
+                EnemyFactory.create_enemy('moving enemy', self, tile_object.x, tile_object.y, ENEMY1PATH, 16)
             if tile_object.name == 'Wall':
                 Wall(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height)
