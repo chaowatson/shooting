@@ -49,6 +49,8 @@ class Shooting(PaiaGame):
                 EnemyFactory.create_enemy('enemy', self, tile_object.x, tile_object.y)
             if tile_object.name == 'MovingEnemy':
                 EnemyFactory.create_enemy('moving enemy', self, tile_object.x, tile_object.y, ENEMY1PATH, 16)
+            if tile_object.name == 'ShootingEnemy':
+                EnemyFactory.create_enemy('shooting enemy', self, tile_object.x, tile_object.y)
             if tile_object.name == 'Wall':
                 Wall(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height)
