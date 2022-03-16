@@ -15,7 +15,7 @@ from .map import *
 from .moving_enemy_path import *
 
 ASSET_PATH = path.join(path.dirname(__file__), "../asset")
-MAP_PATH = path.join(ASSET_PATH, "map/map1.tmx")
+MAP_PATH = path.join(ASSET_PATH, "map/map_easy.tmx")
 
 
 class Shooting(PaiaGame):
@@ -26,7 +26,7 @@ class Shooting(PaiaGame):
     def __init__(self, time_to_play, game_mode):
         super().__init__()
         self.game_result_state = GameResultState.FAIL
-        self.scene = Scene(width=WIDTH, height=HEIGHT, color="#FFFFFF", bias_x=0, bias_y=0)
+        self.scene = Scene(width=20*TILESIZE, height=15*TILESIZE, color="#FFFFFF", bias_x=0*TILESIZE, bias_y=-5*TILESIZE)
         self.map = TiledMap(MAP_PATH)
         self.setup()
         self.score = 0
@@ -45,12 +45,24 @@ class Shooting(PaiaGame):
         for tile_object in self.map.tmxdata.objects:
             if tile_object.name == 'Player':
                 self.player = Player(self, tile_object.x, tile_object.y)
-            if tile_object.name == 'Enemy':
-                EnemyFactory.create_enemy('enemy', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'Enemy.left':
+                EnemyFactory.create_enemy('enemy.left', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'Enemy.right':
+                EnemyFactory.create_enemy('enemy.right', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'Enemy.down':
+                EnemyFactory.create_enemy('enemy.down', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'Enemy.up':
+                EnemyFactory.create_enemy('enemy.up', self, tile_object.x, tile_object.y)
             if tile_object.name == 'MovingEnemy':
                 EnemyFactory.create_enemy('moving enemy', self, tile_object.x, tile_object.y, ENEMY1PATH, 16)
-            if tile_object.name == 'ShootingEnemy':
-                EnemyFactory.create_enemy('shooting enemy', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'ShootingEnemy.left':
+                EnemyFactory.create_enemy('shooting enemy.left', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'ShootingEnemy.right':
+                EnemyFactory.create_enemy('shooting enemy.right', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'ShootingEnemy.down':
+                EnemyFactory.create_enemy('shooting enemy.down', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'ShootingEnemy.up':
+                EnemyFactory.create_enemy('shooting enemy.up', self, tile_object.x, tile_object.y)
             if tile_object.name == 'Wall':
                 Wall(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height)
@@ -116,7 +128,7 @@ class Shooting(PaiaGame):
         Get the initial scene and object information for drawing on the web
         """
         # TODO add music or sound
-        map1_path = path.join(ASSET_PATH, "img/map1.png")
+        map1_path = path.join(ASSET_PATH, "img/map_easy.png")
         map1 = create_asset_init_data("map1", WIDTH, HEIGHT, map1_path, "url")
         player_path = path.join(ASSET_PATH, "img/player.png")
         player = create_asset_init_data("player", 32, 32, player_path, "url")

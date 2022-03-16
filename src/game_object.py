@@ -38,9 +38,9 @@ class Player(pygame.sprite.Sprite):
         self.vel = pygame.math.Vector2(0, 0)
         for motion in motions:
             if motion == "UP":
-                self.vel = pygame.math.Vector2(10, 0).rotate(-self.rot)
+                self.vel = pygame.math.Vector2(15, 0).rotate(-self.rot)
             elif motion == "DOWN":
-                self.vel = pygame.math.Vector2(-10, 0).rotate(-self.rot)
+                self.vel = pygame.math.Vector2(-15, 0).rotate(-self.rot)
             elif motion == "LEFT_TURN":
                 self.rot_speed = 15
             elif motion == "RIGHT_TURN":
@@ -228,8 +228,16 @@ class EnemyFactory:
     def create_enemy(enemy_type, game, x, y, moving_path=None, speed=None):
 
         enemy = {'enemy': Enemy,
+                 'enemy.left': Enemy.facing_left,
+                 'enemy.right': Enemy.facing_right,
+                 'enemy.down': Enemy.facing_down,
+                 'enemy.up': Enemy.facing_up,
                  'moving enemy': MovingEnemy,
-                 'shooting enemy': ShootingEnemy}
+                 'shooting enemy.left': ShootingEnemy.facing_left,
+                 'shooting enemy.right': ShootingEnemy.facing_right,
+                 'shooting enemy.down': ShootingEnemy.facing_down,
+                 'shooting enemy.up': ShootingEnemy.facing_up,
+                 }
 
         return enemy[enemy_type](game, x, y, moving_path, speed)
 
@@ -310,6 +318,29 @@ class Enemy(pygame.sprite.Sprite):
                     else:
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
 
+    @classmethod
+    def facing_left(cls, game, x, y, moving_path, speed):
+        enemy = cls(game, x, y, moving_path, speed)
+        enemy.angle = 180 * math.pi / 180
+        return enemy
+
+    @classmethod
+    def facing_right(cls, game, x, y, moving_path, speed):
+        enemy = cls(game, x, y, moving_path, speed)
+        enemy.angle = 0
+        return enemy
+
+    @classmethod
+    def facing_down(cls, game, x, y, moving_path, speed):
+        enemy = cls(game, x, y, moving_path, speed)
+        enemy.angle = 270 * math.pi / 180
+        return enemy
+
+    @classmethod
+    def facing_up(cls, game, x, y, moving_path, speed):
+        enemy = cls(game, x, y, moving_path, speed)
+        enemy.angle = 90 * math.pi / 180
+        return enemy
 
 class MovingEnemy(Enemy):
     def __init__(self, game, x, y, moving_path: list, speed):
@@ -362,15 +393,39 @@ class ShootingEnemy(Enemy):
 
     def shoot_cd(self):
         self.shot_cool += 1
-        if self.shot_cool % 15 == 0 or self.shot_cool % 15 == 2 or self.shot_cool % 15 == 4:
+        if self.shot_cool % 40 == 0 or self.shot_cool % 40 == 10 :
             self.shot = 0
 
 
     def update(self):
         super(ShootingEnemy, self).update()
+        self.rot = self.angle * 180/math.pi
         self.shoot()
         self.shoot_cd()
 
+    @classmethod
+    def facing_left(cls, game, x, y, moving_path, speed):
+        enemy = cls(game, x, y, moving_path, speed)
+        enemy.angle = 180 * math.pi / 180
+        return enemy
+
+    @classmethod
+    def facing_right(cls, game, x, y, moving_path, speed):
+        enemy = cls(game, x, y, moving_path, speed)
+        enemy.angle = 0
+        return enemy
+
+    @classmethod
+    def facing_down(cls, game, x, y, moving_path, speed):
+        enemy = cls(game, x, y, moving_path, speed)
+        enemy.angle = 270 * math.pi / 180
+        return enemy
+
+    @classmethod
+    def facing_up(cls, game, x, y, moving_path, speed):
+        enemy = cls(game, x, y, moving_path, speed)
+        enemy.angle = 90 * math.pi / 180
+        return enemy
 
 
 class HealthBar(pygame.sprite.Sprite):
