@@ -9,9 +9,10 @@ from mlgame.gamedev.game_interface import PaiaGame, GameResultState, GameStatus
 from mlgame.view.test_decorator import check_game_progress, check_game_result
 from mlgame.view.view_model import create_text_view_data, create_asset_init_data, create_image_view_data, create_line_view_data , Scene
 from mlgame.view.view import PygameView
-from .game_object import *
+from .player import *
 from .param import *
 from .map import *
+from .enemy import *
 from .moving_enemy_path import *
 
 ASSET_PATH = path.join(path.dirname(__file__), "../asset")
