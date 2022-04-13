@@ -54,9 +54,9 @@ class Player(pygame.sprite.Sprite):
 
     def detect(self):
         north_max = 0
-        south_min = 960
+        south_min = 1216
         west_max = 0
-        east_min = 1216
+        east_min = 1856
         for wall in self.game.map.tmxdata.objects:
             if wall.name == 'Wall':
                 if wall.x <= self.rect.centerx and (wall.x + 64) > self.rect.centerx:
@@ -133,6 +133,13 @@ class Player(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, self.game.bullets):
             hit.kill()
             self.hp -= 30
+        hit = pygame.sprite.spritecollideany(self, self.game.aids)
+        if pygame.sprite.spritecollideany(self, self.game.aids):
+            hit.kill()
+            if self.hp <= 50:
+                self.hp += 50
+            else:
+                self.hp = 100
 
     @property
     def game_object_data(self):

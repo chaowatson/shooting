@@ -14,6 +14,7 @@ from .param import *
 from .map import *
 from .enemy import *
 from .moving_enemy_path import *
+from .aid import *
 
 ASSET_PATH = path.join(path.dirname(__file__), "../asset")
 MAP_PATH = path.join(ASSET_PATH, "map/map_easy.tmx")
@@ -41,6 +42,7 @@ class Shooting(PaiaGame):
         self.all_sprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
+        self.aids = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.healthbars = pygame.sprite.Group()
         for tile_object in self.map.tmxdata.objects:
@@ -64,6 +66,8 @@ class Shooting(PaiaGame):
                 EnemyFactory.create_enemy('shooting enemy.down', self, tile_object.x, tile_object.y)
             if tile_object.name == 'ShootingEnemy.up':
                 EnemyFactory.create_enemy('shooting enemy.up', self, tile_object.x, tile_object.y)
+            if tile_object.name == 'Aid':
+                Aid(self,tile_object.x, tile_object.y,)
             if tile_object.name == 'Wall':
                 Wall(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height)
@@ -137,12 +141,15 @@ class Shooting(PaiaGame):
         enemy = create_asset_init_data("enemy", 32, 32, enemy_path, "url")
         bullet_path = path.join(ASSET_PATH, "img/bullet.png")
         bullet = create_asset_init_data("bullet", 32, 32, bullet_path, "url")
+        aid_path = path.join(ASSET_PATH, "img/aid.png")
+        aid = create_asset_init_data("aid", 32, 32, aid_path, "url")
         scene_init_data = {"scene": self.scene.__dict__,
                            "assets": [
                                 map1,
                                 player,
                                 enemy,
-                                bullet
+                                bullet,
+                                aid
                            ],
                            # "audios": {}
                            }
@@ -161,6 +168,10 @@ class Shooting(PaiaGame):
             bullets_data.append(bullet.game_object_data)
         game_obj_list.extend(bullets_data)
         enemies_data = []
+        aids_data = []
+        for aid in self.aids:
+            aids_data.append(aid.game_object_data)
+        game_obj_list.extend(aids_data)
         for enemy in self.enemies:
             enemies_data.append(enemy.game_object_data)
         game_obj_list.extend(enemies_data)
