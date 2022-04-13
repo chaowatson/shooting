@@ -26,3 +26,10 @@ class Aid(pygame.sprite.Sprite):
                 "height": self.rect.height,
                 "image_id": "aid"
                 }
+
+    @staticmethod
+    def get_position(game):
+        position = []
+        for aid in game.aids:
+            position.append(f"{aid.rect.center}")
+        return position

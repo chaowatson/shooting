@@ -54,6 +54,7 @@ class Enemy(pygame.sprite.Sprite):
             hit.kill()
             self.hp -= 30
 
+
     @property
     def game_object_data(self):
         return {"type": "image",
@@ -101,6 +102,13 @@ class Enemy(pygame.sprite.Sprite):
                         sprite.vel = pygame.math.Vector2(-50, 0).rotate(-sprite.rot)
                     else:
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
+
+    @staticmethod
+    def get_position(game):
+        position = []
+        for enemy in game.enemies:
+            position.append(f"{enemy.rect.center}")
+        return position
 
     @classmethod
     def facing_left(cls, game, x, y, moving_path, speed):

@@ -28,7 +28,7 @@ class Shooting(PaiaGame):
     def __init__(self, time_to_play, game_mode):
         super().__init__()
         self.game_result_state = GameResultState.FAIL
-        self.scene = Scene(width=20*TILESIZE, height=15*TILESIZE, color="#FFFFFF", bias_x=0*TILESIZE, bias_y=-5*TILESIZE)
+        self.scene = Scene(width=1216, height=768, color="#FFFFFF", bias_x=0*TILESIZE, bias_y=-8*TILESIZE)
         self.map = TiledMap(MAP_PATH)
         self.setup()
         self.score = 0
@@ -45,6 +45,7 @@ class Shooting(PaiaGame):
         self.aids = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.healthbars = pygame.sprite.Group()
+        self.goals = [(1664, 0), (1728, 0), (1792, 0)]
         for tile_object in self.map.tmxdata.objects:
             if tile_object.name == 'Player':
                 self.player = Player(self, tile_object.x, tile_object.y)
@@ -93,14 +94,17 @@ class Shooting(PaiaGame):
         to_players_data = {}
         data_to_1p = {
             "frame": self.frame_count,
-            "player_x": self.player.rect.centerx,
-            "player_y": self.player.rect.centery,
+            "player_position": self.player.rect.center,
+            "player_angle": self.player.display_angle,
             "score": self.score,
             "status": self.get_game_status(),
             "north_detection": self.player.north_distance,
             "south_detection": self.player.south_distance,
             "west_detection": self.player.west_distance,
             "east_detection": self.player.east_distance,
+            "enemies_position": Enemy.get_position(self),
+            "aids_position": Aid.get_position(self),
+            "goals": self.goals
 
         }
 
@@ -179,11 +183,11 @@ class Shooting(PaiaGame):
         for healthbar in self.healthbars:
             healthbar_data.append(healthbar.game_object_data)
         game_obj_list.extend(healthbar_data)
-        player_angle = create_text_view_data("player's angle = " + str(int(self.player.display_angle)), 12.5*TILESIZE, TILESIZE, "#000000")
-        top_distance = create_text_view_data("north distance = " + str(int(self.player.north_distance)), 12.5*TILESIZE, 0, "#000000")
-        down_distance = create_text_view_data("south distance = " + str(int(self.player.south_distance)), 12.5*TILESIZE, 0.5*TILESIZE,  "#000000")
-        left_distance = create_text_view_data("west distance = " + str(int(self.player.west_distance)), 16.5 *TILESIZE, 0, "#000000")
-        right_distance = create_text_view_data("east distance = " + str(int(self.player.east_distance)), 16.5*TILESIZE, 0.5 * TILESIZE, "#000000")
+        player_angle = create_text_view_data("player's angle = " + str(int(self.player.display_angle)), 11*TILESIZE, TILESIZE, "#000000")
+        top_distance = create_text_view_data("north distance = " + str(int(self.player.north_distance)), 11*TILESIZE, 0, "#000000")
+        down_distance = create_text_view_data("south distance = " + str(int(self.player.south_distance)), 15*TILESIZE, 0.5*TILESIZE,  "#000000")
+        left_distance = create_text_view_data("west distance = " + str(int(self.player.west_distance)), 15*TILESIZE, 0, "#000000")
+        right_distance = create_text_view_data("east distance = " + str(int(self.player.east_distance)), 11*TILESIZE, 0.5 * TILESIZE, "#000000")
         scene_progress = {
             # background view data will be draw first
             "background": [

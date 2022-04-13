@@ -6,15 +6,26 @@ class MLPlay:
         print("Initial ml script")
         self.counter = 0
 
-    def update(self, scene_info: dict):
+    def update(self, scene_info: dict, *args,**kwargs):
         """
         Generate the command according to the received scene information
         """
-        print(scene_info)
+        print("enemies at : ", scene_info["enemies_position"][0], "player at : ", scene_info["player_position"]
+              , "player angle : ", scene_info["player_angle"], "aids at : ", scene_info["aids_position"][0], "goals at : ",
+              scene_info["goals"])
+
+        actions=[
+            "UP",
+            "DOWN",
+            "LEFT_TURN",
+            "RIGHT_TURN",
+            "SHOOT"
+        ]
+        # print(scene_info)
         if scene_info["status"] != "GAME_ALIVE":
             return "RESET"
         else:
-            return ["UP"]
+            return random.sample(actions,1)
 
 
 
