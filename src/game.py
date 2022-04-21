@@ -102,7 +102,8 @@ class Shooting(PaiaGame):
             "south_detection": self.player.south_distance,
             "west_detection": self.player.west_distance,
             "east_detection": self.player.east_distance,
-            "enemies_position": Enemy.get_position(self),
+            "enemies_position": Enemy.get_position(self, "enemy"),
+            "shooting_enemies_position": Enemy.get_position(self, "shooting enemy"),
             "aids_position": Aid.get_position(self),
             "goals": self.goals
 

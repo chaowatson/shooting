@@ -3,6 +3,7 @@ from .enemy import *
 from .healthbar import *
 from .wall import *
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
@@ -29,6 +30,7 @@ class Player(pygame.sprite.Sprite):
         self.south_distance = 0
         self.west_distance = 0
         self.east_distance = 0
+
     def get_keys(self, motions):
         self.rot_speed = 0
         self.vel = pygame.math.Vector2(0, 0)

@@ -10,11 +10,12 @@ class MLPlay:
         """
         Generate the command according to the received scene information
         """
-        print("enemies at : ", scene_info["enemies_position"][0], "player at : ", scene_info["player_position"]
+        print("enemies at : ", scene_info["enemies_position"][0],"shooting enemies at : ", scene_info["shooting_enemies_position"][0],
+              "player at : ", scene_info["player_position"]
               , "player angle : ", scene_info["player_angle"], "aids at : ", scene_info["aids_position"][0], "goals at : ",
               scene_info["goals"])
 
-        actions=[
+        actions = [
             "UP",
             "DOWN",
             "LEFT_TURN",

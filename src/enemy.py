@@ -43,6 +43,7 @@ class Enemy(pygame.sprite.Sprite):
         self.angle = -90 * math.pi / 180
         self.hp = 100
         self.healthbar = HealthBar(self.game, self, "#FF0000")
+        self.type = "enemy"
 
 
     def update(self):
@@ -104,10 +105,15 @@ class Enemy(pygame.sprite.Sprite):
                         sprite.vel = pygame.math.Vector2(50, 0).rotate(-sprite.rot)
 
     @staticmethod
-    def get_position(game):
+    def get_position(game, type):
         position = []
         for enemy in game.enemies:
-            position.append(f"{enemy.rect.center}")
+            if type == "enemy":
+                if enemy.type == "enemy":
+                    position.append(f"{enemy.rect.center}")
+            if type == "shooting enemy":
+                if enemy.type == "shooting enemy":
+                    position.append(f"{enemy.rect.center}")
         return position
 
     @classmethod
